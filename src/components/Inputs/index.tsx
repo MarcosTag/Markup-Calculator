@@ -1,12 +1,13 @@
+import { useState } from "react";
+
 interface InputsProps {
   type: string;
+  typeFunction: string;
   legend: string;
   id: string;
   prefix?: string;
   name?: string;
   placeholder?: string;
-  value?: string | number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   required?: boolean;
   autoFocus?: boolean;
@@ -14,6 +15,21 @@ interface InputsProps {
 }
 
 export const Inputs = (props: InputsProps) => {
+  const [inputValue, setInputValue] = useState("");
+
+  const regexText = /[^\d]/g;
+  const regexNumber = /[^\d]/g;
+
+  const returnValue = (event: any) => {
+    let value = event.target.value;
+
+    if (props.type === "text") {
+      setInputValue(value.replace(regexNumber, ""));
+    } else {
+      setInputValue(value.replace(regexText, ""));
+    }
+  };
+
   return (
     <>
       <label htmlFor={props.id} className="inline-block mt-4">
@@ -32,7 +48,8 @@ export const Inputs = (props: InputsProps) => {
           className="p-2"
           name=""
           id={props.id}
-          onChange={props.onChange}
+          value={inputValue}
+          onChange={returnValue}
         />
       </div>
     </>

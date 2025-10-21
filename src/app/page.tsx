@@ -2,10 +2,6 @@
 import { Buttons } from "@/components/Buttons";
 import { Inputs } from "@/components/Inputs";
 
-const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  console.log(e.target.value);
-};
-
 export default function Home() {
   return (
     <>
@@ -15,13 +11,19 @@ export default function Home() {
 
       <Inputs
         type="text"
+        function="currency"
         legend="Final Cost Price"
         id="cost-price"
         prefix="R$"
-        onChange={inputChange}
       />
 
-      <Inputs type="number" legend="Desired Margin" id="markup" prefix="%" />
+      <Inputs
+        type="text"
+        function="int"
+        legend="Desired Margin"
+        id="markup"
+        prefix="%"
+      />
 
       <Buttons />
     </>

@@ -21,10 +21,31 @@ export const Inputs = (props: InputsProps) => {
   const regexNumber = /[^\d]/g;
 
   const returnValue = (event: any) => {
-    let value = event.target.value;
+    let value: string = event.target.value;
+    const startLength: number = 0;
+    const breakLength: number = value.length - 2;
+    const breakSimbol: string = ',';
+
 
     if (props.type === "text") {
+
+      let newVal: string | undefined = mtMask({
+          paramValue: value,
+          startLength: startLength,
+          breakLength: breakLength,
+          breakSimbol: breakSimbol,
+      });
+
       setInputValue(value.replace(regexNumber, ""));
+
+      console.log(newVal);
+      if(newVal) {
+        newVal = newVal.replace(',', '.');
+        const newValNumber = parseFloat(newVal);
+        newVal = newValNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        console.log(newVal)
+      }
+
     } else {
       setInputValue(value.replace(regexText, ""));
     }
@@ -55,3 +76,19 @@ export const Inputs = (props: InputsProps) => {
     </>
   );
 };
+
+interface MtMask {
+  paramValue: string;
+  startLength: number;
+  breakLength: number;
+  breakSimbol: string;
+}
+
+  function mtMask(params: MtMask) {
+
+    if (params.paramValue.length >= params.breakLength + 1) {
+
+      return params.paramValue.substring(params.startLength, params.breakLength) + params.breakSimbol + params.paramValue.substring(params.breakLength, params.paramValue.length)
+      
+    }
+  }

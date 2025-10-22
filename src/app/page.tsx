@@ -11,7 +11,7 @@ export default function Home() {
 
       <Inputs
         type="text"
-        function="currency"
+        typeFunction="currency"
         legend="Final Cost Price"
         id="cost-price"
         prefix="R$"
@@ -19,7 +19,7 @@ export default function Home() {
 
       <Inputs
         type="text"
-        function="int"
+        typeFunction="int"
         legend="Desired Margin"
         id="markup"
         prefix="%"

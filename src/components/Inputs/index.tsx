@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Interface } from "readline";
 
 interface InputsProps {
   type: string;
   typeFunction: string;
   legend: string;
   id: string;
+  locale?: string;
   prefix?: string;
   name?: string;
   placeholder?: string;
@@ -17,37 +19,21 @@ interface InputsProps {
 export const Inputs = (props: InputsProps) => {
   const [inputValue, setInputValue] = useState("");
 
-  const regexText = /[^\d]/g;
-  const regexNumber = /[^\d]/g;
+  // apenas números
+  const regexFormat = /[^0-9]/g;
 
-  const returnValue = (event: any) => {
-    let value: string = event.target.value;
-    const startLength: number = 0;
-    const breakLength: number = value.length - 2;
-    const breakSimbol: string = ',';
+  const returnValue = (event: any): void => {
+    const value = event.target.value;
 
-
-    if (props.type === "text") {
-
-      let newVal: string | undefined = mtMask({
-          paramValue: value,
-          startLength: startLength,
-          breakLength: breakLength,
-          breakSimbol: breakSimbol,
-      });
-
-      setInputValue(value.replace(regexNumber, ""));
-
-      console.log(newVal);
-      if(newVal) {
-        newVal = newVal.replace(',', '.');
-        const newValNumber = parseFloat(newVal);
-        newVal = newValNumber.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        console.log(newVal)
-      }
-
+    if (props.typeFunction === "currency" || props.typeFunction === "int") {
+      setInputValue(
+        mtMask({
+          value: value.replace(regexFormat, ""),
+          locale: props.locale,
+        })
+      );
     } else {
-      setInputValue(value.replace(regexText, ""));
+      setInputValue(value);
     }
   };
 
@@ -71,6 +57,7 @@ export const Inputs = (props: InputsProps) => {
           id={props.id}
           value={inputValue}
           onChange={returnValue}
+          maxLength={19}
         />
       </div>
     </>
@@ -78,17 +65,40 @@ export const Inputs = (props: InputsProps) => {
 };
 
 interface MtMask {
-  paramValue: string;
-  startLength: number;
-  breakLength: number;
-  breakSimbol: string;
+  value: string;
+  locale: string | undefined;
 }
 
-  function mtMask(params: MtMask) {
+function mtMask(props: MtMask): string {
+  let arrVal: string[] = props.value.split("");
 
-    if (params.paramValue.length >= params.breakLength + 1) {
+  // Adiciona ou remove zeros à esquerda dependendo do tamanho do array
+  switch (arrVal.length) {
+    case 0:
+      arrVal.unshift("0");
+      arrVal.unshift("0");
+      arrVal.unshift("0");
+      break;
 
-      return params.paramValue.substring(params.startLength, params.breakLength) + params.breakSimbol + params.paramValue.substring(params.breakLength, params.paramValue.length)
-      
-    }
+    case 1:
+      arrVal.unshift("0");
+      arrVal.unshift("0");
+      break;
+
+    case 2:
+      arrVal.unshift("0");
+      break;
   }
+
+  // formata a string para virar float e depois formata novamente para virar toLocaleString
+  const valueFormat = parseFloat(
+    arrVal.join("").slice(0, arrVal.length - 2) +
+      "." +
+      arrVal.join("").slice(arrVal.length - 2)
+  ).toLocaleString(props.locale ?? "en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return valueFormat;
+}

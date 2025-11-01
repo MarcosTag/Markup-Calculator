@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Interface } from "readline";
 
 interface InputsProps {
@@ -6,6 +5,8 @@ interface InputsProps {
   typeFunction: string;
   legend: string;
   id: string;
+  value: string;
+  onValueChange: (value: string) => void;
   locale?: string;
   prefix?: string;
   name?: string;
@@ -17,25 +18,21 @@ interface InputsProps {
 }
 
 export const Inputs = (props: InputsProps) => {
-  const [inputValue, setInputValue] = useState("");
-
-  // apenas números
   const regexFormat = /[^0-9]/g;
 
-  const returnValue = (event: any): void => {
+  const returnValue = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.value;
-
-    if (props.typeFunction === "currency" || props.typeFunction === "int") {
-      setInputValue(
-        mtMask({
-          value: value.replace(regexFormat, ""),
-          locale: props.locale,
-        })
-      );
-    } else {
-      setInputValue(value);
-    }
+    const rawValue = value.replace(regexFormat, "");
+    props.onValueChange(rawValue);
   };
+
+  let displayValue = props.value;
+  if (props.typeFunction === "currency" && props.value) {
+    displayValue = mtMask({
+      value: props.value,
+      locale: props.locale,
+    });
+  }
 
   return (
     <>
@@ -55,7 +52,7 @@ export const Inputs = (props: InputsProps) => {
           className="p-2"
           name=""
           id={props.id}
-          value={inputValue}
+          value={displayValue}
           onChange={returnValue}
           maxLength={19}
         />
@@ -71,8 +68,6 @@ interface MtMask {
 
 function mtMask(props: MtMask): string {
   let arrVal: string[] = props.value.split("");
-
-  // Adiciona ou remove zeros à esquerda dependendo do tamanho do array
   switch (arrVal.length) {
     case 0:
       arrVal.unshift("0");
@@ -84,21 +79,18 @@ function mtMask(props: MtMask): string {
       arrVal.unshift("0");
       arrVal.unshift("0");
       break;
-
     case 2:
       arrVal.unshift("0");
       break;
   }
 
-  // formata a string para virar float e depois formata novamente para virar toLocaleString
   const valueFormat = parseFloat(
     arrVal.join("").slice(0, arrVal.length - 2) +
       "." +
-      arrVal.join("").slice(arrVal.length - 2)
+      arrVal.join("").slice(arrVal.length - 2),
   ).toLocaleString(props.locale ?? "en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-
   return valueFormat;
 }
